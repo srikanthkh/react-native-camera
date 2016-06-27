@@ -132,10 +132,6 @@ public class RCTCamera {
         return result;
     }
 
-    public int getOrientation() {
-        return _orientation;
-    }
-
     public void setOrientation(int orientation) {
         if (_orientation == orientation) {
             return;
@@ -228,30 +224,8 @@ public class RCTCamera {
         }
     }
 
-    public void adjustCameraRotationToDeviceOrientation(int type, int deviceOrientation)
-    {
-        Camera camera = _cameras.get(type);
-        if (null == camera) {
-            return;
-        }
-
-        CameraInfoWrapper cameraInfo = _cameraInfos.get(type);
-        int rotation;
-        int orientation = cameraInfo.info.orientation;
-        if (cameraInfo.info.facing == Camera.CameraInfo.CAMERA_FACING_FRONT) {
-            rotation = (orientation + deviceOrientation * 90) % 360;
-        } else {
-            rotation = (orientation - deviceOrientation * 90 + 360) % 360;
-        }
-        cameraInfo.rotation = rotation;
-        Camera.Parameters parameters = camera.getParameters();
-        parameters.setRotation(cameraInfo.rotation);
-
-        try {
-            camera.setParameters(parameters);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+      public int getActualDeviceOrientation() {
+        return _actualDeviceOrientation;
     }
 
     private void adjustPreviewLayout(int type) {
@@ -272,15 +246,13 @@ public class RCTCamera {
             displayRotation = rotation;
         }
         cameraInfo.rotation = rotation;
-        // TODO: take in account the _orientation prop
+ 
 
         camera.setDisplayOrientation(displayRotation);
 
         Camera.Parameters parameters = camera.getParameters();
         parameters.setRotation(cameraInfo.rotation);
 
-        // set preview size
-        // defaults to highest resolution available
         Camera.Size optimalPreviewSize = getBestPreviewSize(type, Integer.MAX_VALUE, Integer.MAX_VALUE);
         int width = optimalPreviewSize.width;
         int height = optimalPreviewSize.height;
